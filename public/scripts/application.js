@@ -6,9 +6,10 @@ function randomizer(max = 1, min = 0) {
 }
 
 class Frame {
-  constructor(score) {
+  constructor(score, tenthFrame) {
     this.marks = [score];
     this.sum = score;
+    this.tenthFrame = tenthFrame;
   }
 
   add = (score) => {
@@ -27,16 +28,16 @@ class Frame {
 
 class Bowling {
   constructor(name) {
-    this.score = [];
+    this.frames = [];
     nameEl.textContent = name;
   }
 
   printFrame = (i) => {
-    let score = `<div>${this.score[i].marks.join(" ")}</div>`;
-    if (this.score[i].isStrike()) {
+    let score = `<div>${this.frames[i].marks.join(" ")}</div>`;
+    if (this.frames[i].isStrike()) {
       score += `<div>X</div>`;
     }
-    if (this.score[i].isSpare()) {
+    if (this.frames[i].isSpare()) {
       score += `<div>/</div>`;
     }
 
@@ -45,10 +46,9 @@ class Bowling {
 
   bowlFinalFrame = () => {
     let score = randomizer(10);
-    const frame = new Frame(score);
+    const frame = new Frame(score, true);
 
-    // strike again
-    if (score === 10) {
+    if (frame.isStrike()) {
       score = randomizer(10);
       frame.add(score);
 
@@ -58,25 +58,24 @@ class Bowling {
       score = randomizer(10 - score);
       frame.add(score);
 
-      // spare
-      if (frame[0] + frame[1] === 10) {
+      if (frame.isSpare()) {
         score = randomizer(10);
         frame.add(score);
       }
     }
 
-    this.score.push(frame);
+    this.frames.push(frame);
   };
 
-  bowl = () => {
+  bowlFrame = () => {
     const score = randomizer(10);
     const frame = new Frame(score);
 
-    if (score !== 10) {
+    if (!frame.isStrike()) {
       frame.add(randomizer(10 - score));
     }
 
-    this.score.push(frame);
+    this.frames.push(frame);
   };
 }
 
@@ -85,6 +84,6 @@ const game = new Bowling("Travis");
 const frameEls = document.querySelectorAll(".frames li");
 
 for (let i = 0; i < FRAMES; i++) {
-  i < FRAMES - 1 ? game.bowl() : game.bowlFinalFrame();
+  i < FRAMES - 1 ? game.bowlFrame() : game.bowlFinalFrame();
   frameEls[i].innerHTML = game.printFrame(i);
 }
