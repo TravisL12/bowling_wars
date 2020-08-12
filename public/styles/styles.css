@@ -7,7 +7,7 @@ li {
 
 .frames ul {
   display: grid;
-  grid-template-columns: repeat(10, 60px);
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
   grid-gap: 10px;
 }
 

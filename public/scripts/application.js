@@ -40,21 +40,11 @@ const bowling = {
 
 function buildScorecard(name) {
   const template = document.createElement('template');
+  const framesList = Array(FRAMES).fill('<li></li>').join('');
   template.innerHTML = `
       <div class="frames">
           <span>${name}</span>
-          <ul>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-          </ul>
+          <ul>${framesList}</ul>
           <span class="score"></span>
         </div>
     `;
@@ -105,9 +95,6 @@ class Player {
   };
 }
 
-const FRAMES = 10;
-const bowlingEl = document.getElementById('bowling');
-
 class Game {
   constructor(players) {
     this.players = players.map((name) => new Player(name));
@@ -128,6 +115,8 @@ class Game {
   };
 }
 
+const FRAMES = 10;
+const bowlingEl = document.getElementById('bowling');
 const game = new Game(['Travis', 'Marisa', 'Connor', 'Harper']);
 
 for (let i = 0; i < FRAMES; i++) {
