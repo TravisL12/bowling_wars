@@ -21,6 +21,11 @@ li {
   border: 1px solid black;
 }
 
+.frame .score {
+  text-align: right;
+  padding: 2px 10px;
+}
+
 .scores {
   display: flex;
   justify-content: flex-end;
@@ -38,9 +43,4 @@ li {
 
 .scores .roll1 {
   border-right: 1px solid;
-}
-
-.frame .score {
-  text-align: right;
-  padding: 2px 10px;
 }

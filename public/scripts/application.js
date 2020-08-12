@@ -45,19 +45,18 @@ const bowling = {
 
 function buildScorecard(name) {
   const scoreMarkup = `
-  <li class="frame">
-  <div class="scores">
-  <span class="roll roll1"></span>
-        <span class="roll roll2"></span>
-        </div>
-        <div class="score"></div>
+        <li class="frame">
+              <div class="scores">
+                <span class="roll roll1"></span>
+                <span class="roll roll2"></span>
+              </div>
+              <div class="score"></div>
         </li>`;
-  const framesList = Array(FRAMES).fill(scoreMarkup).join('');
   const template = document.createElement('template');
   template.innerHTML = `
       <div class="player">
           <span>${name}</span>
-          <ul>${framesList}</ul>
+          <ul>${Array(FRAMES).fill(scoreMarkup).join('')}</ul>
           <span class="total"></span>
         </div>
     `;
@@ -96,10 +95,10 @@ class Player {
     const [roll1, roll2] = this.frames[i].marks;
     const frame = this.framesEl[i];
     frame.querySelector('.roll1').textContent = this.frames[i].isStrike()
-      ? 'X'
+      ? STRIKE
       : roll1;
     frame.querySelector('.roll2').textContent = this.frames[i].isSpare()
-      ? '/'
+      ? SPARE
       : roll2;
     frame.querySelector('.score').textContent = this.frames[i].sum();
   };
@@ -122,8 +121,10 @@ class Game {
   };
 }
 
-const bowlingEl = document.getElementById('bowling');
 const FRAMES = 10;
+const STRIKE = 'X';
+const SPARE = '/';
+const bowlingEl = document.getElementById('bowling');
 const game = new Game(['Travis', 'Marisa', 'Connor', 'Harper']);
 
 for (let i = 0; i < FRAMES; i++) {
