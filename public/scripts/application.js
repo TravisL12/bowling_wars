@@ -2,40 +2,8 @@ function randomizer(max = 1, min = 0) {
   return Math.round(Math.random() * (max - min) + min);
 }
 
-class Frame {
-  constructor(score, tenthFrame) {
-    this.marks = [score];
-    this.tenthFrame = tenthFrame;
-  }
-
-  sum = () => this.marks.reduce((sum, m) => (sum += m), 0);
-
-  add = (score) => this.marks.push(score);
-
-  isStrike = () => this.marks.length === 1 && this.sum() === 10;
-
-  isSpare = () => this.marks.length === 2 && this.sum() === 10;
-}
-
-class Bowling {
-  constructor() {
-    this.score = 0;
-    this.frames = [];
-  }
-
-  printFrame = (i) => {
-    let score = `<div>${this.frames[i].marks.join(' ')}</div>`;
-    if (this.frames[i].isStrike()) {
-      score += `<div>X</div>`;
-    }
-    if (this.frames[i].isSpare()) {
-      score += `<div>/</div>`;
-    }
-
-    return score;
-  };
-
-  bowlFinalFrame = () => {
+const bowling = {
+  bowlFinalFrame: () => {
     let score = randomizer(10);
     const frame = new Frame(score, true);
 
@@ -55,11 +23,10 @@ class Bowling {
       }
     }
 
-    this.frames.push(frame);
-    this.score += frame.sum();
-  };
+    return frame;
+  },
 
-  bowlFrame = () => {
+  bowlFrame: () => {
     const score = randomizer(10);
     const frame = new Frame(score);
 
@@ -67,17 +34,15 @@ class Bowling {
       frame.add(randomizer(10 - score));
     }
 
-    this.frames.push(frame);
-    this.score += frame.sum();
-  };
-}
+    return frame;
+  },
+};
 
-class Game {
-  constructor(name) {
-    const template = document.createElement('template');
-    template.innerHTML = `
+function buildScorecard(name) {
+  const template = document.createElement('template');
+  template.innerHTML = `
       <div class="frames">
-          <span id="name">${name}</span>
+          <span>${name}</span>
           <ul>
             <li></li>
             <li></li>
@@ -90,23 +55,81 @@ class Game {
             <li></li>
             <li></li>
           </ul>
-          <span id="score"></span>
+          <span class="score"></span>
         </div>
     `;
-    bowlingEl.appendChild(template.content.firstElementChild);
-  }
+  return template.content.firstElementChild;
 }
 
-const bowlingEl = document.getElementById('bowling');
-new Game('Travis');
-const scoreEl = document.getElementById('score');
+class Frame {
+  constructor(score, tenthFrame) {
+    this.marks = [score];
+    this.tenthFrame = tenthFrame;
+  }
+
+  sum = () => this.marks.reduce((sum, m) => (sum += m), 0);
+
+  add = (score) => this.marks.push(score);
+
+  isStrike = () => this.marks.length === 1 && this.sum() === 10;
+
+  isSpare = () => this.marks.length === 2 && this.sum() === 10;
+}
+
+class Player {
+  constructor(name) {
+    this.frames = [];
+    this.score = 0;
+    this.scoreCard = buildScorecard(name);
+    this.framesEl = this.scoreCard.querySelectorAll('.frames li');
+    bowlingEl.appendChild(this.scoreCard);
+  }
+
+  addFrame = (frame) => {
+    this.score += frame.sum();
+    this.frames.push(frame);
+    const scoreEl = this.scoreCard.querySelector('.score');
+    scoreEl.textContent = `Score: ${this.score}`;
+  };
+
+  printFrame = (i) => {
+    let score = `<div>${this.frames[i].marks.join(' ')}</div>`;
+    if (this.frames[i].isStrike()) {
+      score += `<div>X</div>`;
+    }
+    if (this.frames[i].isSpare()) {
+      score += `<div>/</div>`;
+    }
+
+    this.framesEl[i].innerHTML = score;
+  };
+}
 
 const FRAMES = 10;
-const game = new Bowling();
-const frameEls = document.querySelectorAll('.frames li');
+const bowlingEl = document.getElementById('bowling');
+
+class Game {
+  constructor(players) {
+    this.players = players.map((name) => new Player(name));
+    this.frameNumber = 0;
+  }
+
+  play = () => {
+    for (let i = 0; i < this.players.length; i++) {
+      const frame =
+        this.frameNumber < FRAMES - 1
+          ? bowling.bowlFrame()
+          : bowling.bowlFinalFrame();
+      const player = this.players[i];
+      player.addFrame(frame);
+      player.printFrame(this.frameNumber);
+    }
+    this.frameNumber++;
+  };
+}
+
+const game = new Game(['Travis', 'Marisa', 'Connor', 'Harper']);
 
 for (let i = 0; i < FRAMES; i++) {
-  i < FRAMES - 1 ? game.bowlFrame() : game.bowlFinalFrame();
-  frameEls[i].innerHTML = game.printFrame(i);
-  scoreEl.textContent = `Score: ${game.score}`;
+  game.play();
 }
