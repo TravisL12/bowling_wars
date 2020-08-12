@@ -1,6 +1,3 @@
-const nameEl = document.getElementById("name");
-const scoreEl = document.getElementById("score");
-
 function randomizer(max = 1, min = 0) {
   return Math.round(Math.random() * (max - min) + min);
 }
@@ -21,14 +18,13 @@ class Frame {
 }
 
 class Bowling {
-  constructor(name) {
+  constructor() {
     this.score = 0;
     this.frames = [];
-    nameEl.textContent = name;
   }
 
   printFrame = (i) => {
-    let score = `<div>${this.frames[i].marks.join(" ")}</div>`;
+    let score = `<div>${this.frames[i].marks.join(' ')}</div>`;
     if (this.frames[i].isStrike()) {
       score += `<div>X</div>`;
     }
@@ -76,9 +72,38 @@ class Bowling {
   };
 }
 
+class Game {
+  constructor(name) {
+    const template = document.createElement('template');
+    template.innerHTML = `
+      <div class="frames">
+          <span id="name">${name}</span>
+          <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+          </ul>
+          <span id="score"></span>
+        </div>
+    `;
+    bowlingEl.appendChild(template.content.firstElementChild);
+  }
+}
+
+const bowlingEl = document.getElementById('bowling');
+new Game('Travis');
+const scoreEl = document.getElementById('score');
+
 const FRAMES = 10;
-const game = new Bowling("Travis");
-const frameEls = document.querySelectorAll(".frames li");
+const game = new Bowling();
+const frameEls = document.querySelectorAll('.frames li');
 
 for (let i = 0; i < FRAMES; i++) {
   i < FRAMES - 1 ? game.bowlFrame() : game.bowlFinalFrame();
