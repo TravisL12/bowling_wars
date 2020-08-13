@@ -11,7 +11,7 @@ li {
 
 .player ul {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 60px);
+  grid-template-columns: repeat(auto-fill, 80px);
   grid-gap: 10px;
 }
 
@@ -41,6 +41,6 @@ li {
   text-align: center;
 }
 
-.scores .roll1 {
-  border-right: 1px solid;
+.scores .roll:nth-child(n + 2) {
+  border-left: 1px solid;
 }

@@ -1,5 +1,6 @@
 function randomizer(max = 1, min = 0) {
-  return Math.round(Math.random() * (max - min) + min);
+  //   return Math.round(Math.random() * (max - min) + min);
+  return 10;
 }
 
 function bowl(frameNumber) {
@@ -52,11 +53,23 @@ function buildScorecard(name) {
               </div>
               <div class="score"></div>
         </li>`;
-  const template = document.createElement('template');
+  const template = document.createElement("template");
   template.innerHTML = `
       <div class="player">
           <span>${name}</span>
-          <ul>${Array(FRAMES).fill(scoreMarkup).join('')}</ul>
+          <ul>
+            ${Array(FRAMES - 1)
+              .fill(scoreMarkup)
+              .join("")}
+            <li class="tenth frame">
+              <div class="scores">
+                <span class="roll roll1"></span>
+                <span class="roll roll2"></span>
+                <span class="roll roll3"></span>
+              </div>
+            <div class="score"></div>
+        </li>
+          </ul>
           <span class="total"></span>
         </div>
     `;
@@ -80,27 +93,64 @@ class Player {
     this.frames = [];
     this.score = 0;
     this.scoreCard = buildScorecard(name);
-    this.framesEl = this.scoreCard.querySelectorAll('.player .frame');
+    this.framesEl = this.scoreCard.querySelectorAll(".player .frame");
     bowlingEl.appendChild(this.scoreCard);
   }
 
   addFrame = (frame) => {
     this.score += frame.sum();
     this.frames.push(frame);
-    const totalEl = this.scoreCard.querySelector('.total');
+    const totalEl = this.scoreCard.querySelector(".total");
     totalEl.textContent = `Total: ${this.score}`;
   };
 
   renderFrame = (i) => {
     const [roll1, roll2] = this.frames[i].marks;
-    const frame = this.framesEl[i];
-    frame.querySelector('.roll1').textContent = this.frames[i].isStrike()
+    const frameEl = this.framesEl[i];
+    frameEl.querySelector(".roll1").textContent = this.frames[i].isStrike()
       ? STRIKE
       : roll1;
-    frame.querySelector('.roll2').textContent = this.frames[i].isSpare()
+    frameEl.querySelector(".roll2").textContent = this.frames[i].isSpare()
       ? SPARE
       : roll2;
-    frame.querySelector('.score').textContent = this.frames[i].sum();
+    this.drawScores();
+  };
+
+  drawScores = () => {
+    let summedScore = 0;
+    for (let i = 0; i < this.frames.length; i++) {
+      const frame = this.frames[i];
+      const frameEl = this.framesEl[i];
+
+      if (frame.isStrike()) {
+        const first = this.frames[i + 1];
+        const second = this.frames[i + 2];
+        if (first && second) {
+          if (first.isStrike() && second.isStrike()) {
+            summedScore += frame.sum() + first.sum() + second.sum();
+          } else if (first.isStrike()) {
+            summedScore += frame.sum() + first.sum() + second.marks[0];
+          } else {
+            summedScore += frame.sum() + first.sum();
+          }
+          frameEl.querySelector(".score").textContent = summedScore;
+        } else {
+          frameEl.querySelector(".score").textContent = "-";
+        }
+      } else if (frame.isSpare()) {
+        const first = this.frames[i + 1];
+        if (first) {
+          summedScore += frame.sum() + first.sum();
+          frameEl.querySelector(".score").textContent = summedScore;
+        } else {
+          frameEl.querySelector(".score").textContent = "-";
+        }
+      } else {
+        summedScore += frame.sum();
+        frameEl.querySelector(".score").textContent = summedScore;
+      }
+    }
+    this.score = summedScore;
   };
 }
 
@@ -122,10 +172,10 @@ class Game {
 }
 
 const FRAMES = 10;
-const STRIKE = 'X';
-const SPARE = '/';
-const bowlingEl = document.getElementById('bowling');
-const game = new Game(['Travis', 'Marisa', 'Connor', 'Harper']);
+const STRIKE = "X";
+const SPARE = "/";
+const bowlingEl = document.getElementById("bowling");
+const game = new Game(["Travis", "Marisa", "Connor", "Harper"]);
 
 for (let i = 0; i < FRAMES; i++) {
   game.play();
