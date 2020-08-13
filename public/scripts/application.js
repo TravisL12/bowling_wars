@@ -99,8 +99,6 @@ class Player {
   addFrame = (frame) => {
     this.score += frame.sum();
     this.frames.push(frame);
-    const totalEl = this.scoreCard.querySelector(".total");
-    totalEl.textContent = `Total: ${this.score}`;
   };
 
   addClass = (frameEl, selector, result) => {
@@ -175,6 +173,8 @@ class Player {
       frameEl.querySelector(".score").textContent = summedScore;
     }
     this.score = summedScore;
+    const totalEl = this.scoreCard.querySelector(".total");
+    totalEl.textContent = `Total: ${this.score}`;
   };
 }
 
@@ -209,7 +209,7 @@ function play() {
     if (game.frameNumber >= FRAMES) {
       clearInterval(interval);
     }
-  }, 1000);
+  }, 250);
 }
 
 play();
