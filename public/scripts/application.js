@@ -1,6 +1,6 @@
 function randomizer(max = 1, min = 0) {
-  //   return Math.round(Math.random() * (max - min) + min);
-  return 10;
+  return Math.round(Math.random() * (max - min) + min);
+  //   return 10;
 }
 
 function bowl(frameNumber) {
@@ -104,51 +104,76 @@ class Player {
     totalEl.textContent = `Total: ${this.score}`;
   };
 
-  renderFrame = (i) => {
-    const [roll1, roll2] = this.frames[i].marks;
-    const frameEl = this.framesEl[i];
-    frameEl.querySelector(".roll1").textContent = this.frames[i].isStrike()
-      ? STRIKE
-      : roll1;
-    frameEl.querySelector(".roll2").textContent = this.frames[i].isSpare()
-      ? SPARE
-      : roll2;
-    this.drawScores();
+  addClass = (frameEl, selector, result) => {
+    frameEl.querySelector(selector).textContent = result;
+    if (result === STRIKE) {
+      frameEl.querySelector(selector).classList.add("strike");
+    }
+    if (result === SPARE) {
+      frameEl.querySelector(selector).classList.add("spare");
+    }
   };
 
-  drawScores = () => {
+  renderFrame = (i) => {
+    const frame = this.frames[i];
+    const frameEl = this.framesEl[i];
+    const [roll1, roll2, roll3] = frame.marks;
+
+    const result1 =
+      (roll1 === 10 && frame.tenthFrame) || frame.isStrike() ? STRIKE : roll1;
+
+    const result2 =
+      roll1 === 10 && roll2 === 10 && frame.tenthFrame
+        ? STRIKE
+        : roll1 + roll2 === 10
+        ? SPARE
+        : roll2;
+
+    this.addClass(frameEl, ".roll1", result1);
+    this.addClass(frameEl, ".roll2", result2);
+
+    if (roll3) {
+      const result3 =
+        roll1 === 10 && roll2 === 10 && roll3 === 10 && frame.tenthFrame
+          ? STRIKE
+          : roll2 + roll3 === 10
+          ? SPARE
+          : roll3;
+      this.addClass(frameEl, ".roll3", result3);
+    }
+
+    this.updateScore();
+  };
+
+  twoRollsScore = (i) => {
+    const firstNextFrame = this.frames[i + 1];
+    const secondNextFrame = this.frames[i + 2];
+    return firstNextFrame
+      ? firstNextFrame.marks.concat(secondNextFrame?.marks || []).slice(0, 2)
+      : [];
+  };
+
+  updateScore = () => {
     let summedScore = 0;
     for (let i = 0; i < this.frames.length; i++) {
       const frame = this.frames[i];
       const frameEl = this.framesEl[i];
+      const [roll1, roll2] = this.twoRollsScore(i);
 
       if (frame.isStrike()) {
-        const first = this.frames[i + 1];
-        const second = this.frames[i + 2];
-        if (first && second) {
-          if (first.isStrike() && second.isStrike()) {
-            summedScore += frame.sum() + first.sum() + second.sum();
-          } else if (first.isStrike()) {
-            summedScore += frame.sum() + first.sum() + second.marks[0];
-          } else {
-            summedScore += frame.sum() + first.sum();
-          }
-          frameEl.querySelector(".score").textContent = summedScore;
-        } else {
-          frameEl.querySelector(".score").textContent = "-";
-        }
+        summedScore =
+          (roll1 || roll1 === 0) && (roll2 || roll2 === 0)
+            ? summedScore + frame.sum() + roll1 + roll2
+            : summedScore;
       } else if (frame.isSpare()) {
-        const first = this.frames[i + 1];
-        if (first) {
-          summedScore += frame.sum() + first.sum();
-          frameEl.querySelector(".score").textContent = summedScore;
-        } else {
-          frameEl.querySelector(".score").textContent = "-";
-        }
+        summedScore =
+          roll1 || roll1 === 0
+            ? summedScore + frame.sum() + roll1
+            : summedScore;
       } else {
         summedScore += frame.sum();
-        frameEl.querySelector(".score").textContent = summedScore;
       }
+      frameEl.querySelector(".score").textContent = summedScore;
     }
     this.score = summedScore;
   };
@@ -176,6 +201,7 @@ const STRIKE = "X";
 const SPARE = "/";
 const bowlingEl = document.getElementById("bowling");
 const game = new Game(["Travis", "Marisa", "Connor", "Harper"]);
+// const game = new Game(["Travis"]);
 
 for (let i = 0; i < FRAMES; i++) {
   game.play();
