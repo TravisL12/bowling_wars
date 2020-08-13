@@ -45,6 +45,7 @@ li {
 }
 
 .scores .roll {
+  height: 28px;
   width: 22px;
   padding: 5px;
   box-sizing: border-box;

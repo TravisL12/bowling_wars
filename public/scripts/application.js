@@ -1,6 +1,5 @@
 function randomizer(max = 1, min = 0) {
   return Math.round(Math.random() * (max - min) + min);
-  //   return 10;
 }
 
 function bowl(frameNumber) {
@@ -201,8 +200,16 @@ const STRIKE = "X";
 const SPARE = "/";
 const bowlingEl = document.getElementById("bowling");
 const game = new Game(["Travis", "Marisa", "Connor", "Harper"]);
-// const game = new Game(["Travis"]);
 
-for (let i = 0; i < FRAMES; i++) {
+let interval;
+function play() {
   game.play();
+  interval = setInterval(() => {
+    game.play();
+    if (game.frameNumber >= FRAMES) {
+      clearInterval(interval);
+    }
+  }, 1000);
 }
+
+play();
