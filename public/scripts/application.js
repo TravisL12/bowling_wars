@@ -2,48 +2,53 @@ function randomizer(max = 1, min = 0) {
   return Math.round(Math.random() * (max - min) + min);
 }
 
-function bowl(frameNumber) {
-  return frameNumber < FRAMES - 1
-    ? bowling.bowlFrame()
-    : bowling.bowlFinalFrame();
-}
-const bowling = {
-  bowlFinalFrame: () => {
-    let score = randomizer(10);
-    const frame = new Frame(score, true);
+const bowlFinalFrame = () => {
+  let score = randomizer(PINS);
+  const frame = new Frame(score, true);
 
-    if (frame.isStrike()) {
-      score = randomizer(10);
+  if (frame.isStrike()) {
+    score = randomizer(PINS);
+    frame.add(score);
+
+    const finalRandom = score === PINS ? PINS : PINS - score;
+    frame.add(randomizer(finalRandom));
+  } else {
+    score = randomizer(PINS - score);
+    frame.add(score);
+
+    if (frame.isSpare()) {
+      score = randomizer(PINS);
       frame.add(score);
-
-      const finalRandom = score === 10 ? 10 : 10 - score;
-      frame.add(randomizer(finalRandom));
-    } else {
-      score = randomizer(10 - score);
-      frame.add(score);
-
-      if (frame.isSpare()) {
-        score = randomizer(10);
-        frame.add(score);
-      }
     }
+  }
 
-    return frame;
-  },
-
-  bowlFrame: () => {
-    const score = randomizer(10);
-    const frame = new Frame(score);
-
-    if (!frame.isStrike()) {
-      frame.add(randomizer(10 - score));
-    }
-
-    return frame;
-  },
+  return frame;
 };
 
+const bowlFrame = () => {
+  const score = randomizer(PINS);
+  const frame = new Frame(score);
+
+  if (!frame.isStrike()) {
+    frame.add(randomizer(PINS - score));
+  }
+
+  return frame;
+};
+
+function addMarkStyle(frameEl, selector, result) {
+  const frame = frameEl.querySelector(selector);
+  frame.textContent = result;
+  if (result === STRIKE) {
+    frame.classList.add('strike');
+  }
+  if (result === SPARE) {
+    frame.classList.add('spare');
+  }
+}
+
 function buildScorecard(name) {
+  const template = document.createElement('template');
   const scoreMarkup = `
         <li class="frame">
               <div class="scores">
@@ -52,14 +57,13 @@ function buildScorecard(name) {
               </div>
               <div class="score"></div>
         </li>`;
-  const template = document.createElement("template");
   template.innerHTML = `
       <div class="player">
           <span>${name}</span>
           <ul>
             ${Array(FRAMES - 1)
               .fill(scoreMarkup)
-              .join("")}
+              .join('')}
             <li class="tenth frame">
               <div class="scores">
                 <span class="roll roll1"></span>
@@ -76,15 +80,15 @@ function buildScorecard(name) {
 }
 
 class Frame {
-  constructor(score, tenthFrame) {
+  constructor(score, finalFrame) {
     this.marks = [score];
-    this.tenthFrame = tenthFrame;
+    this.finalFrame = finalFrame;
   }
 
   sum = () => this.marks.reduce((sum, m) => (sum += m), 0);
   add = (score) => this.marks.push(score);
-  isStrike = () => this.marks.length === 1 && this.sum() === 10;
-  isSpare = () => this.marks.length === 2 && this.sum() === 10;
+  isStrike = () => this.marks.length === 1 && this.sum() === PINS;
+  isSpare = () => this.marks.length === 2 && this.sum() === PINS;
 }
 
 class Player {
@@ -92,52 +96,50 @@ class Player {
     this.frames = [];
     this.score = 0;
     this.scoreCard = buildScorecard(name);
-    this.framesEl = this.scoreCard.querySelectorAll(".player .frame");
+    this.framesEl = this.scoreCard.querySelectorAll('.player .frame');
     bowlingEl.appendChild(this.scoreCard);
   }
 
-  addFrame = (frame) => {
-    this.score += frame.sum();
-    this.frames.push(frame);
-  };
+  renderFinalFrame = (i) => {
+    const frame = this.frames[i];
+    const frameEl = this.framesEl[i];
+    const [roll1, roll2, roll3] = frame.marks;
 
-  addClass = (frameEl, selector, result) => {
-    frameEl.querySelector(selector).textContent = result;
-    if (result === STRIKE) {
-      frameEl.querySelector(selector).classList.add("strike");
+    const result1 = roll1 === PINS ? STRIKE : roll1;
+
+    const result2 =
+      roll1 === PINS && roll2 === PINS
+        ? STRIKE
+        : roll1 < PINS && roll1 + roll2 === PINS
+        ? SPARE
+        : roll2;
+
+    addMarkStyle(frameEl, '.roll1', result1);
+    addMarkStyle(frameEl, '.roll2', result2);
+
+    if (roll3) {
+      const allStrikes = roll1 === PINS && roll2 === PINS && roll3 === PINS;
+      const spareAndStrike = roll1 + roll2 === PINS && roll3 === PINS;
+      const strikeAndSpare = roll1 === PINS && roll2 + roll3 === PINS;
+
+      const result3 =
+        allStrikes || spareAndStrike ? STRIKE : strikeAndSpare ? SPARE : roll3;
+      addMarkStyle(frameEl, '.roll3', result3);
     }
-    if (result === SPARE) {
-      frameEl.querySelector(selector).classList.add("spare");
-    }
+
+    this.updateScore();
   };
 
   renderFrame = (i) => {
     const frame = this.frames[i];
     const frameEl = this.framesEl[i];
-    const [roll1, roll2, roll3] = frame.marks;
+    const [roll1, roll2] = frame.marks;
 
-    const result1 =
-      (roll1 === 10 && frame.tenthFrame) || frame.isStrike() ? STRIKE : roll1;
+    const result1 = frame.isStrike() ? STRIKE : roll1;
+    addMarkStyle(frameEl, '.roll1', result1);
 
-    const result2 =
-      roll1 === 10 && roll2 === 10 && frame.tenthFrame
-        ? STRIKE
-        : roll1 + roll2 === 10
-        ? SPARE
-        : roll2;
-
-    this.addClass(frameEl, ".roll1", result1);
-    this.addClass(frameEl, ".roll2", result2);
-
-    if (roll3) {
-      const result3 =
-        roll1 === 10 && roll2 === 10 && roll3 === 10 && frame.tenthFrame
-          ? STRIKE
-          : roll2 + roll3 === 10
-          ? SPARE
-          : roll3;
-      this.addClass(frameEl, ".roll3", result3);
-    }
+    const result2 = frame.isSpare() ? SPARE : roll2;
+    addMarkStyle(frameEl, '.roll2', result2);
 
     this.updateScore();
   };
@@ -155,25 +157,26 @@ class Player {
     for (let i = 0; i < this.frames.length; i++) {
       const frame = this.frames[i];
       const frameEl = this.framesEl[i];
-      const [roll1, roll2] = this.twoRollsScore(i);
+      const [nextRoll1, nextRoll2] = this.twoRollsScore(i);
+      const nextRoll1Exist = nextRoll1 || nextRoll1 === 0;
+      const nextRoll2Exist = nextRoll2 || nextRoll2 === 0;
 
       if (frame.isStrike()) {
         summedScore =
-          (roll1 || roll1 === 0) && (roll2 || roll2 === 0)
-            ? summedScore + frame.sum() + roll1 + roll2
+          nextRoll1Exist && nextRoll2Exist
+            ? summedScore + frame.sum() + nextRoll1 + nextRoll2
             : summedScore;
       } else if (frame.isSpare()) {
-        summedScore =
-          roll1 || roll1 === 0
-            ? summedScore + frame.sum() + roll1
-            : summedScore;
+        summedScore = nextRoll1Exist
+          ? summedScore + frame.sum() + nextRoll1
+          : summedScore;
       } else {
         summedScore += frame.sum();
       }
-      frameEl.querySelector(".score").textContent = summedScore;
+      frameEl.querySelector('.score').textContent = summedScore;
     }
     this.score = summedScore;
-    const totalEl = this.scoreCard.querySelector(".total");
+    const totalEl = this.scoreCard.querySelector('.total');
     totalEl.textContent = `Total: ${this.score}`;
   };
 }
@@ -186,20 +189,26 @@ class Game {
 
   play = () => {
     for (let i = 0; i < this.players.length; i++) {
-      const frame = bowl(this.frameNumber);
       const player = this.players[i];
-      player.addFrame(frame);
-      player.renderFrame(this.frameNumber);
+      const frame =
+        this.frameNumber < FRAMES - 1 ? bowlFrame() : bowlFinalFrame();
+
+      player.frames.push(frame);
+      frame.finalFrame
+        ? player.renderFinalFrame(this.frameNumber)
+        : player.renderFrame(this.frameNumber);
     }
     this.frameNumber++;
   };
 }
 
 const FRAMES = 10;
-const STRIKE = "X";
-const SPARE = "/";
-const bowlingEl = document.getElementById("bowling");
-const game = new Game(["Travis", "Marisa", "Connor", "Harper"]);
+const PINS = 10;
+const STRIKE = 'X';
+const SPARE = '/';
+const bowlingEl = document.getElementById('bowling');
+// const game = new Game(['Travis']);
+const game = new Game(['Travis', 'Marisa', 'Connor', 'Harper']);
 
 let interval;
 function play() {
@@ -209,7 +218,7 @@ function play() {
     if (game.frameNumber >= FRAMES) {
       clearInterval(interval);
     }
-  }, 250);
+  }, 0);
 }
 
 play();
