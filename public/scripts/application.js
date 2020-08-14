@@ -40,15 +40,15 @@ function addMarkStyle(frameEl, selector, result) {
   const frame = frameEl.querySelector(selector);
   frame.textContent = result;
   if (result === STRIKE) {
-    frame.classList.add('strike');
+    frame.classList.add("strike");
   }
   if (result === SPARE) {
-    frame.classList.add('spare');
+    frame.classList.add("spare");
   }
 }
 
 function buildScorecard(name) {
-  const template = document.createElement('template');
+  const template = document.createElement("template");
   const scoreMarkup = `
         <li class="frame">
               <div class="scores">
@@ -59,36 +59,38 @@ function buildScorecard(name) {
         </li>`;
   template.innerHTML = `
       <div class="player">
-          <span>${name}</span>
           <ul>
             ${Array(FRAMES - 1)
               .fill(scoreMarkup)
-              .join('')}
+              .join("")}
             <li class="tenth frame">
               <div class="scores">
                 <span class="roll roll1"></span>
                 <span class="roll roll2"></span>
                 <span class="roll roll3"></span>
               </div>
-            <div class="score"></div>
-        </li>
+              <div class="score"></div>
+            </li>
+            <li>
+              <div class="name">${name}</div>
+              <div class="total"></div>
+            </li>
           </ul>
-          <span class="total"></span>
         </div>
     `;
   return template.content.firstElementChild;
 }
 
 class Frame {
-  constructor(score, finalFrame) {
-    this.marks = [score];
+  constructor(score, finalFrame = false) {
+    this.rolls = [score];
     this.finalFrame = finalFrame;
   }
 
-  sum = () => this.marks.reduce((sum, m) => (sum += m), 0);
-  add = (score) => this.marks.push(score);
-  isStrike = () => this.marks.length === 1 && this.sum() === PINS;
-  isSpare = () => this.marks.length === 2 && this.sum() === PINS;
+  sum = () => this.rolls.reduce((sum, m) => (sum += m), 0);
+  add = (score) => this.rolls.push(score);
+  isStrike = () => this.rolls.length === 1 && this.sum() === PINS;
+  isSpare = () => this.rolls.length === 2 && this.sum() === PINS;
 }
 
 class Player {
@@ -96,14 +98,15 @@ class Player {
     this.frames = [];
     this.score = 0;
     this.scoreCard = buildScorecard(name);
-    this.framesEl = this.scoreCard.querySelectorAll('.player .frame');
+    this.framesEl = this.scoreCard.querySelectorAll(".player .frame");
+    this.name = name;
     bowlingEl.appendChild(this.scoreCard);
   }
 
   renderFinalFrame = (i) => {
     const frame = this.frames[i];
     const frameEl = this.framesEl[i];
-    const [roll1, roll2, roll3] = frame.marks;
+    const [roll1, roll2, roll3] = frame.rolls;
 
     const result1 = roll1 === PINS ? STRIKE : roll1;
 
@@ -114,8 +117,8 @@ class Player {
         ? SPARE
         : roll2;
 
-    addMarkStyle(frameEl, '.roll1', result1);
-    addMarkStyle(frameEl, '.roll2', result2);
+    addMarkStyle(frameEl, ".roll1", result1);
+    addMarkStyle(frameEl, ".roll2", result2);
 
     if (roll3) {
       const allStrikes = roll1 === PINS && roll2 === PINS && roll3 === PINS;
@@ -124,7 +127,7 @@ class Player {
 
       const result3 =
         allStrikes || spareAndStrike ? STRIKE : strikeAndSpare ? SPARE : roll3;
-      addMarkStyle(frameEl, '.roll3', result3);
+      addMarkStyle(frameEl, ".roll3", result3);
     }
 
     this.updateScore();
@@ -133,13 +136,13 @@ class Player {
   renderFrame = (i) => {
     const frame = this.frames[i];
     const frameEl = this.framesEl[i];
-    const [roll1, roll2] = frame.marks;
+    const [roll1, roll2] = frame.rolls;
 
     const result1 = frame.isStrike() ? STRIKE : roll1;
-    addMarkStyle(frameEl, '.roll1', result1);
+    addMarkStyle(frameEl, ".roll1", result1);
 
     const result2 = frame.isSpare() ? SPARE : roll2;
-    addMarkStyle(frameEl, '.roll2', result2);
+    addMarkStyle(frameEl, ".roll2", result2);
 
     this.updateScore();
   };
@@ -148,7 +151,7 @@ class Player {
     const firstNextFrame = this.frames[i + 1];
     const secondNextFrame = this.frames[i + 2];
     return firstNextFrame
-      ? firstNextFrame.marks.concat(secondNextFrame?.marks || []).slice(0, 2)
+      ? firstNextFrame.rolls.concat(secondNextFrame?.rolls || []).slice(0, 2)
       : [];
   };
 
@@ -157,6 +160,7 @@ class Player {
     for (let i = 0; i < this.frames.length; i++) {
       const frame = this.frames[i];
       const frameEl = this.framesEl[i];
+      frameEl.classList.add("played");
       const [nextRoll1, nextRoll2] = this.twoRollsScore(i);
       const nextRoll1Exist = nextRoll1 || nextRoll1 === 0;
       const nextRoll2Exist = nextRoll2 || nextRoll2 === 0;
@@ -173,10 +177,10 @@ class Player {
       } else {
         summedScore += frame.sum();
       }
-      frameEl.querySelector('.score').textContent = summedScore;
+      frameEl.querySelector(".score").textContent = summedScore;
     }
     this.score = summedScore;
-    const totalEl = this.scoreCard.querySelector('.total');
+    const totalEl = this.scoreCard.querySelector(".total");
     totalEl.textContent = `Total: ${this.score}`;
   };
 }
@@ -200,15 +204,27 @@ class Game {
     }
     this.frameNumber++;
   };
+
+  getWinner = () => {
+    const winner = this.players.reduce(
+      (winner, player) => {
+        if (player.score > winner.score) {
+          winner = player;
+        }
+        return winner;
+      },
+      { score: 0 }
+    );
+    winner.scoreCard.style["background-color"] = "lightblue";
+  };
 }
 
 const FRAMES = 10;
 const PINS = 10;
-const STRIKE = 'X';
-const SPARE = '/';
-const bowlingEl = document.getElementById('bowling');
-// const game = new Game(['Travis']);
-const game = new Game(['Travis', 'Marisa', 'Connor', 'Harper']);
+const STRIKE = "X";
+const SPARE = "/";
+const bowlingEl = document.getElementById("bowling");
+const game = new Game(["Travis", "Marisa", "Connor", "Harper"]);
 
 let interval;
 function play() {
@@ -217,8 +233,9 @@ function play() {
     game.play();
     if (game.frameNumber >= FRAMES) {
       clearInterval(interval);
+      game.getWinner();
     }
-  }, 0);
+  }, 250);
 }
 
 play();

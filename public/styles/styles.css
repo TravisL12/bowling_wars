@@ -1,3 +1,9 @@
+html {
+  font-family: Arial, Helvetica, sans-serif;
+}
+body {
+  margin: 0;
+}
 ul,
 li {
   padding: 0;
@@ -6,7 +12,7 @@ li {
 }
 
 .player {
-  margin-bottom: 20px;
+  padding: 10px;
 }
 
 .player ul {
@@ -15,20 +21,13 @@ li {
   grid-gap: 10px;
 }
 
-.strike {
-  color: gold;
-  background: red;
-}
-
-.spare {
-  color: blue;
-  background: silver;
-}
-
 .frame {
   display: flex;
   flex-direction: column;
   border: 1px solid black;
+}
+.frame.played {
+  background: lightgoldenrodyellow;
 }
 
 .frame .score {
@@ -50,6 +49,17 @@ li {
   padding: 5px;
   box-sizing: border-box;
   text-align: center;
+  background: white;
+}
+
+.scores .roll.strike {
+  color: gold;
+  background: red;
+}
+
+.scores .roll.spare {
+  color: blue;
+  background: silver;
 }
 
 .scores .roll:nth-child(n + 2) {
