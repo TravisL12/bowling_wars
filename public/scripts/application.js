@@ -4,7 +4,7 @@ function randomizer(max = 1, min = 0) {
 
 const bowlFinalFrame = () => {
   let score = randomizer(PINS);
-  const frame = new Frame(score, true);
+  const frame = new Frame(score);
 
   if (frame.isStrike()) {
     score = randomizer(PINS);
@@ -82,9 +82,8 @@ function buildScorecard(name) {
 }
 
 class Frame {
-  constructor(score, finalFrame = false) {
+  constructor(score) {
     this.rolls = [score];
-    this.finalFrame = finalFrame;
   }
 
   sum = () => this.rolls.reduce((sum, m) => (sum += m), 0);
@@ -194,11 +193,11 @@ class Game {
   play = () => {
     for (let i = 0; i < this.players.length; i++) {
       const player = this.players[i];
-      const frame =
-        this.frameNumber < FRAMES - 1 ? bowlFrame() : bowlFinalFrame();
+      const isFinalFrame = this.frameNumber === FRAMES - 1;
+      const frame = !isFinalFrame ? bowlFrame() : bowlFinalFrame();
 
       player.frames.push(frame);
-      frame.finalFrame
+      isFinalFrame
         ? player.renderFinalFrame(this.frameNumber)
         : player.renderFrame(this.frameNumber);
     }
