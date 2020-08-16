@@ -1,0 +1,54 @@
+.player {
+  padding: 10px;
+}
+
+.player ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 80px);
+  grid-gap: 10px;
+}
+
+.frame {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid black;
+}
+.frame.played {
+  background: lightgoldenrodyellow;
+}
+
+.frame .score {
+  text-align: right;
+  padding: 2px 10px;
+}
+
+.scores {
+  display: flex;
+  justify-content: flex-end;
+  border-bottom: 1px solid black;
+  border-left: 1px solid black;
+  margin-left: auto;
+}
+
+.scores .roll {
+  height: 28px;
+  width: 22px;
+  padding: 5px;
+  box-sizing: border-box;
+  text-align: center;
+  background: white;
+}
+
+.scores .roll.strike {
+  color: gold;
+  background: red;
+}
+
+.scores .roll.spare {
+  color: blue;
+  background: silver;
+}
+
+.scores .roll:nth-child(n + 2) {
+  border-left: 1px solid;
+}
