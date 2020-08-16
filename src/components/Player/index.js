@@ -1,7 +1,7 @@
 import React from "react";
 import Frame from "../Frame";
 
-function Player({ player, winner }) {
+function Player({ player }) {
   const twoRollsScore = (i) => {
     const firstNextFrame = player.frames[i + 1];
     const secondNextFrame = player.frames[i + 2];
@@ -12,16 +12,16 @@ function Player({ player, winner }) {
 
   return (
     <div
-      class="player"
-      style={{ backgroundColor: winner ? "lightblue" : "inherit" }}
+      className="player"
+      style={{ backgroundColor: player.winner ? "lightblue" : "inherit" }}
     >
       <ul>
-        {player.frames.map((frame) => (
-          <Frame frameInfo={frame} />
+        {player.frames.map((frame, idx) => (
+          <Frame key={idx} frameInfo={frame} />
         ))}
         <li>
-          <div class="name">{player.name}</div>
-          <div class="total"></div>
+          <div className="name">{player.name}</div>
+          <div className="total"></div>
         </li>
       </ul>
     </div>

@@ -48,17 +48,19 @@ function Frame({ frameInfo }) {
   const results = frameInfo.isFinalFrame ? renderFinalFrame() : renderFrame();
 
   return (
-    <li class={`frame ${frameInfo.isFinalFrame ? "tenth" : ""}`}>
-      <div class="scores">
-        <span class={`roll roll1 ${addMarkStyle(results[0])}`}>
+    <li className={`frame ${frameInfo.isFinalFrame ? "tenth" : ""}`}>
+      <div className="scores">
+        <span className={`roll roll1 ${addMarkStyle(results[0])}`}>
           {results[0]}
         </span>
-        <span class={`roll roll2 ${addMarkStyle(results[1])}`}>
+        <span className={`roll roll2 ${addMarkStyle(results[1])}`}>
           {results[1]}
         </span>
-        {frameInfo.isFinalFrame && <span class="roll roll3">{results[2]}</span>}
+        {frameInfo.isFinalFrame && (
+          <span className="roll roll3">{results[2]}</span>
+        )}
       </div>
-      <div class="score"></div>
+      <div className="score"></div>
     </li>
   );
 }

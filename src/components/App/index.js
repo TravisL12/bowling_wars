@@ -11,10 +11,10 @@ export const SPARE = "/";
 function App() {
   const [frameNumber, setFrameNumber] = useState(0);
   const [players, setPlayers] = useState([
-    { name: "Travis", frames: [], score: 0 },
-    { name: "Marisa", frames: [], score: 0 },
-    { name: "Connor", frames: [], score: 0 },
-    { name: "Harper", frames: [], score: 0 },
+    { name: "Travis", frames: [], score: 0, winner: false },
+    { name: "Marisa", frames: [], score: 0, winner: false },
+    { name: "Connor", frames: [], score: 0, winner: false },
+    { name: "Harper", frames: [], score: 0, winner: false },
   ]);
 
   const play = () => {
@@ -26,20 +26,26 @@ function App() {
 
       player.frames.push(frame);
     }
+
+    if (frameNumber === FRAMES - 1) {
+      const winnerIdx = getWinner();
+      playersCopy[winnerIdx].winner = true;
+    }
     setPlayers(playersCopy);
     setFrameNumber(frameNumber + 1);
   };
 
   const getWinner = () => {
-    const winner = players.reduce(
-      (winner, player) => {
+    const winnerIdx = players.reduce(
+      (winner, player, idx) => {
         if (player.score > winner.score) {
-          winner = player;
+          winner.idx = idx;
         }
         return winner;
       },
-      { score: 0 }
+      { score: 0, idx: 0 }
     );
+    return winnerIdx.idx;
   };
 
   return (
@@ -48,7 +54,7 @@ function App() {
         Play!
       </button>
       {players.map((player) => (
-        <Player player={player} winner={false} />
+        <Player key={player.name} player={player} />
       ))}
     </div>
   );
