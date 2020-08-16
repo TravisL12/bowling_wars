@@ -60,7 +60,7 @@ function Frame({ frameInfo }) {
           <span className="roll roll3">{results[2]}</span>
         )}
       </div>
-      <div className="score"></div>
+      <div className="score">{frameInfo.score}</div>
     </li>
   );
 }
