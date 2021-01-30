@@ -47,6 +47,7 @@ function App() {
     );
     return winnerIdx.idx;
   };
+  const frameCollection = Array.from({ length: frameNumber }, (_, i) => i + 1);
 
   return (
     <div className="App">
@@ -54,7 +55,14 @@ function App() {
         <button onClick={play} disabled={frameNumber >= FRAMES}>
           Play!
         </button>
-        <span>Frame: {frameNumber <= 9 ? frameNumber + 1 : frameNumber}</span>
+      </div>
+      <div className="player">
+        <ul>
+          <li></li>
+          {frameCollection.map((num) => {
+            return <li style={{ textAlign: 'center' }}>{num}</li>;
+          })}
+        </ul>
       </div>
       {players.map((player) => (
         <Player key={player.name} player={player} />

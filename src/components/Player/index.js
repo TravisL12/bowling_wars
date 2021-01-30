@@ -1,5 +1,5 @@
-import React from "react";
-import Frame from "../Frame";
+import React from 'react';
+import Frame from '../Frame';
 
 function Player({ player }) {
   const twoRollsScore = (i) => {
@@ -36,21 +36,19 @@ function Player({ player }) {
     return player.frames;
   };
 
-  const framesScored = updateScore();
-
   return (
     <div
       className="player"
-      style={{ backgroundColor: player.winner ? "lightblue" : "inherit" }}
+      style={{ backgroundColor: player.winner ? 'lightblue' : 'inherit' }}
     >
       <ul>
-        {framesScored.map((frame, idx) => (
-          <Frame key={idx} frameInfo={frame} />
-        ))}
         <li>
           <div className="name">{player.name}</div>
           <div className="total"></div>
         </li>
+        {updateScore().map((frame, idx) => (
+          <Frame key={idx} frameInfo={frame} />
+        ))}
       </ul>
     </div>
   );
